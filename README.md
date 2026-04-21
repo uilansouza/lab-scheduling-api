@@ -249,7 +249,23 @@ docker compose exec api pytest tests/ -v
 DATABASE_URL="sqlite:///./test.db" \
 API_KEY_AGENT="agent-key-change-in-prod" \
 API_KEY_ADMIN="admin-key-change-in-prod" \
+
+----------------------
+terminal bash
+export PYTHONPATH=.
+pytest
+---------------------
+windows
+set PYTHONPATH=.
+pytest
+---------------------
+PowerShell
+set PYTHONPATH=.
+pytest
+---------------------
+
 pytest tests/ -v
+
 
 # Com relatório de cobertura
 pytest tests/ --cov=app --cov-report=term-missing
