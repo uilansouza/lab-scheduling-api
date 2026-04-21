@@ -1,0 +1,72 @@
+{
+  "_comment": "Example payloads for the Lab Scheduling API",
+
+  "create_order_minimal": {
+    "endpoint": "POST /api/v1/orders",
+    "headers": { "X-API-Key": "agent-key-change-in-prod" },
+    "body": {
+      "user_ref": "USR-0001",
+      "exam_codes": ["EXM-0001"]
+    }
+  },
+
+  "create_order_full": {
+    "endpoint": "POST /api/v1/orders",
+    "headers": { "X-API-Key": "agent-key-change-in-prod" },
+    "body": {
+      "user_ref": "USR-0042",
+      "org_ref": "ORG-0007",
+      "exam_codes": ["EXM-0001", "EXM-0011", "EXM-0029", "EXM-0041", "EXM-0061"],
+      "window_start": "2025-03-10T07:00:00Z",
+      "window_end": "2025-03-10T12:00:00Z",
+      "notes": "Jejum de 12h obrigatório para EXM-0011 e EXM-0029"
+    }
+  },
+
+  "create_order_invalid_code": {
+    "endpoint": "POST /api/v1/orders",
+    "headers": { "X-API-Key": "agent-key-change-in-prod" },
+    "body": {
+      "user_ref": "USR-0003",
+      "exam_codes": ["EXM-0001", "EXM-INVALID"],
+      "window_start": "2025-03-10T07:00:00Z",
+      "window_end": "2025-03-10T12:00:00Z"
+    },
+    "_expected_response": {
+      "status_code": 422,
+      "body": {
+        "error": "INVALID_EXAM_CODES",
+        "message": "One or more exam codes are invalid or inactive",
+        "details": { "invalid_codes": ["EXM-INVALID"] }
+      }
+    }
+  },
+
+  "cancel_order": {
+    "endpoint": "PATCH /api/v1/orders/{order_id}/cancel",
+    "headers": { "X-API-Key": "agent-key-change-in-prod" },
+    "body": {
+      "reason": "Solicitação de cancelamento pelo agente REQ-0001"
+    }
+  },
+
+  "list_exams_paginated": {
+    "endpoint": "GET /api/v1/exams?page=1&page_size=10&active_only=true",
+    "headers": {}
+  },
+
+  "filter_exams_by_category": {
+    "endpoint": "GET /api/v1/exams?search=Hematologia&page=1&page_size=20",
+    "headers": {}
+  },
+
+  "list_orders_filtered": {
+    "endpoint": "GET /api/v1/orders?status=PENDING&page=1&page_size=20",
+    "headers": { "X-API-Key": "agent-key-change-in-prod" }
+  },
+
+  "audit_logs_by_resource": {
+    "endpoint": "GET /api/v1/audit?resource=orders&page=1&page_size=20",
+    "headers": { "X-API-Key": "admin-key-change-in-prod" }
+  }
+}
