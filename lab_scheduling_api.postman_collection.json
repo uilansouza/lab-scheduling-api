@@ -1,0 +1,606 @@
+{
+  "info": {
+    "name": "Lab Scheduling API",
+    "description": "Coleção completa da Lab Scheduling API.\n\n**Como usar:**\n1. Importe este arquivo no Postman\n2. Selecione o environment `Lab Local`\n3. As variáveis `base_url`, `agent_key`, `admin_key` já estão configuradas\n4. Após criar um pedido, copie o `id` retornado e cole na variável `order_id`\n\n**Autenticação:**\n- Header `X-API-Key: {{agent_key}}` para rotas de pedidos\n- Header `X-API-Key: {{admin_key}}` para auditoria\n- Sem header para catálogo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "agent_key",
+      "value": "agent-key-change-in-prod",
+      "type": "string"
+    },
+    {
+      "key": "admin_key",
+      "value": "admin-key-change-in-prod",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "PASTE_ORDER_ID_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🩺 Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica se a API está em execução. Retorna status e versão. Rota pública, sem autenticação."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"status\": \"ok\",\n  \"version\": \"1.0.0\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔬 Catalog — Exames",
+      "description": "Endpoints públicos. Não requerem autenticação.",
+      "item": [
+        {
+          "name": "List Exams — padrão",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "10"},
+                {"key": "active_only", "value": "true", "disabled": true},
+                {"key": "code", "value": "EXM-0001", "disabled": true},
+                {"key": "search", "value": "Hemograma", "disabled": true}
+              ]
+            },
+            "description": "Lista exames com paginação. Parâmetros opcionais desativados — habilite para filtrar."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"items\": [\n    {\n      \"code\": \"EXM-0001\",\n      \"name\": \"Hemograma Completo Sintético\",\n      \"description\": \"Contagem de células sanguíneas e diferencial\",\n      \"category\": \"HEMATOLOGY\",\n      \"active\": true\n    },\n    {\n      \"code\": \"EXM-0002\",\n      \"name\": \"Eritrograma Sintético\",\n      \"description\": \"Análise da série vermelha\",\n      \"category\": \"HEMATOLOGY\",\n      \"active\": true\n    }\n  ],\n  \"total\": 110,\n  \"page\": 1,\n  \"page_size\": 10,\n  \"pages\": 11\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Exams — filtro por search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams?search=Hemograma&page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams"],
+              "query": [
+                {"key": "search", "value": "Hemograma"},
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "20"}
+              ]
+            },
+            "description": "Busca exames pelo nome ou descrição. Trocar 'Hemograma' por qualquer termo."
+          },
+          "response": []
+        },
+        {
+          "name": "List Exams — filtro por código",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams?code=EXM-0011",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams"],
+              "query": [
+                {"key": "code", "value": "EXM-0011"}
+              ]
+            },
+            "description": "Filtra pelo código exato do exame."
+          },
+          "response": []
+        },
+        {
+          "name": "List Exams — incluir inativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams?active_only=false&page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams"],
+              "query": [
+                {"key": "active_only", "value": "false"},
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "20"}
+              ]
+            },
+            "description": "Por padrão, active_only=true. Passe false para incluir exames inativos."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Exam by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams/EXM-0001",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams", "EXM-0001"]
+            },
+            "description": "Retorna detalhe de um único exame. Troque EXM-0001 por qualquer código válido."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"code\": \"EXM-0001\",\n  \"name\": \"Hemograma Completo Sintético\",\n  \"description\": \"Contagem de células sanguíneas e diferencial\",\n  \"category\": \"HEMATOLOGY\",\n  \"active\": true\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"NOT_FOUND\",\n  \"message\": \"Exam 'EXM-9999' not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Exam by Code — 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/exams/EXM-INVALIDO",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "exams", "EXM-INVALIDO"]
+            },
+            "description": "Demonstra o retorno 404 para um código inexistente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📋 Orders — Pedidos",
+      "description": "Requerem header `X-API-Key` com role agent ou admin.",
+      "item": [
+        {
+          "name": "List Order Statuses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/statuses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "statuses"]
+            },
+            "description": "Retorna todos os estados possíveis de um pedido.\n\nSemântica:\n- PENDING: recebido, aguardando confirmação\n- CONFIRMED: confirmado pelo lab\n- COLLECTED: amostra coletada (terminal)\n- CANCELLED: cancelado (terminal)"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "[\"PENDING\", \"CONFIRMED\", \"COLLECTED\", \"CANCELLED\"]"
+            }
+          ]
+        },
+        {
+          "name": "Create Order — completo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ref\": \"USR-0042\",\n  \"org_ref\": \"ORG-0007\",\n  \"exam_codes\": [\"EXM-0001\", \"EXM-0011\", \"EXM-0041\"],\n  \"window_start\": \"2025-06-10T07:00:00Z\",\n  \"window_end\": \"2025-06-10T12:00:00Z\",\n  \"notes\": \"Jejum de 12h obrigatório\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            },
+            "description": "Cria um pedido com todos os campos. Copie o `id` retornado e cole na variável `order_id` da coleção."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n  \"user_ref\": \"USR-0042\",\n  \"org_ref\": \"ORG-0007\",\n  \"status\": \"PENDING\",\n  \"window_start\": \"2025-06-10T07:00:00Z\",\n  \"window_end\": \"2025-06-10T12:00:00Z\",\n  \"notes\": \"Jejum de 12h obrigatório\",\n  \"created_at\": \"2025-04-21T10:00:00Z\",\n  \"updated_at\": \"2025-04-21T10:00:00Z\",\n  \"items\": [\n    {\"exam_code\": \"EXM-0001\", \"exam_name\": \"Hemograma Completo Sintético\"},\n    {\"exam_code\": \"EXM-0011\", \"exam_name\": \"Glicose em Jejum Sintética\"},\n    {\"exam_code\": \"EXM-0041\", \"exam_name\": \"TSH Sintético\"}\n  ],\n  \"status_history\": [\n    {\"status\": \"PENDING\", \"changed_at\": \"2025-04-21T10:00:00Z\", \"changed_by\": \"agent\"}\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Order — mínimo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ref\": \"USR-0001\",\n  \"exam_codes\": [\"EXM-0029\"]\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            },
+            "description": "Cria um pedido com apenas os campos obrigatórios (user_ref e exam_codes)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Order — ❌ código inválido (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ref\": \"USR-0001\",\n  \"exam_codes\": [\"EXM-0001\", \"EXM-INVALIDO\"]\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            },
+            "description": "Demonstra a rejeição de pedido com código de exame inválido. Retorna 422 com detalhe dos códigos inválidos."
+          },
+          "response": [
+            {
+              "name": "422 Invalid Codes",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"INVALID_EXAM_CODES\",\n  \"message\": \"One or more exam codes are invalid or inactive\",\n  \"details\": {\n    \"invalid_codes\": [\"EXM-INVALIDO\"]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Order — ❌ sem autenticação (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ref\": \"USR-0001\",\n  \"exam_codes\": [\"EXM-0001\"]\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            },
+            "description": "Demonstra o retorno 401 quando a API Key está ausente."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Invalid or missing API key\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "10"},
+                {"key": "status", "value": "PENDING", "disabled": true},
+                {"key": "user_ref", "value": "USR-0001", "disabled": true}
+              ]
+            },
+            "description": "Lista todos os pedidos com paginação. Parâmetros opcionais desativados:\n- `status`: filtrar por PENDING | CONFIRMED | COLLECTED | CANCELLED\n- `user_ref`: filtrar pelo identificador do utilizador"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n      \"user_ref\": \"USR-0042\",\n      \"org_ref\": \"ORG-0007\",\n      \"status\": \"PENDING\",\n      \"window_start\": \"2025-06-10T07:00:00Z\",\n      \"window_end\": \"2025-06-10T12:00:00Z\",\n      \"notes\": null,\n      \"created_at\": \"2025-04-21T10:00:00Z\",\n      \"updated_at\": \"2025-04-21T10:00:00Z\",\n      \"items\": [],\n      \"status_history\": []\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"page_size\": 10,\n  \"pages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Orders — filtro PENDING",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders?status=PENDING&page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [
+                {"key": "status", "value": "PENDING"},
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "20"}
+              ]
+            },
+            "description": "Lista apenas pedidos com status PENDING. Substitua por CONFIRMED, COLLECTED ou CANCELLED."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}"]
+            },
+            "description": "Retorna o detalhe completo de um pedido: itens com nome do exame e histórico de estados.\n\n⚠️ Configure a variável `order_id` na coleção com um ID real retornado pelo Create Order."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n  \"user_ref\": \"USR-0042\",\n  \"org_ref\": \"ORG-0007\",\n  \"status\": \"PENDING\",\n  \"window_start\": \"2025-06-10T07:00:00Z\",\n  \"window_end\": \"2025-06-10T12:00:00Z\",\n  \"notes\": \"Jejum de 12h obrigatório\",\n  \"created_at\": \"2025-04-21T10:00:00Z\",\n  \"updated_at\": \"2025-04-21T10:00:00Z\",\n  \"items\": [\n    {\"exam_code\": \"EXM-0001\", \"exam_name\": \"Hemograma Completo Sintético\"},\n    {\"exam_code\": \"EXM-0011\", \"exam_name\": \"Glicose em Jejum Sintética\"},\n    {\"exam_code\": \"EXM-0041\", \"exam_name\": \"TSH Sintético\"}\n  ],\n  \"status_history\": [\n    {\"status\": \"PENDING\", \"changed_at\": \"2025-04-21T10:00:00Z\", \"changed_by\": \"agent\"}\n  ]\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"NOT_FOUND\",\n  \"message\": \"Order a1b2c3d4-e5f6-7890-abcd-ef1234567890 not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order Status & History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            },
+            "description": "Retorna o status atual e o histórico completo de transições de estado do pedido."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n  \"status\": \"PENDING\",\n  \"status_history\": [\n    {\"status\": \"PENDING\", \"changed_at\": \"2025-04-21T10:00:00Z\", \"changed_by\": \"agent\"}\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Solicitação de cancelamento pelo agente REQ-0001\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "cancel"]
+            },
+            "description": "Cancela um pedido. O campo `reason` é opcional.\n\nRegras:\n- Pedidos COLLECTED não podem ser cancelados (409)\n- Pedidos já CANCELLED retornam 409\n- PENDING e CONFIRMED podem ser cancelados"
+          },
+          "response": [
+            {
+              "name": "200 OK — cancelado",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n  \"user_ref\": \"USR-0042\",\n  \"org_ref\": \"ORG-0007\",\n  \"status\": \"CANCELLED\",\n  \"window_start\": \"2025-06-10T07:00:00Z\",\n  \"window_end\": \"2025-06-10T12:00:00Z\",\n  \"notes\": null,\n  \"created_at\": \"2025-04-21T10:00:00Z\",\n  \"updated_at\": \"2025-04-21T10:05:00Z\",\n  \"items\": [\n    {\"exam_code\": \"EXM-0001\", \"exam_name\": \"Hemograma Completo Sintético\"}\n  ],\n  \"status_history\": [\n    {\"status\": \"PENDING\",    \"changed_at\": \"2025-04-21T10:00:00Z\", \"changed_by\": \"agent\"},\n    {\"status\": \"CANCELLED\", \"changed_at\": \"2025-04-21T10:05:00Z\", \"changed_by\": \"agent\"}\n  ]\n}"
+            },
+            {
+              "name": "409 Already Cancelled",
+              "status": "Conflict",
+              "code": 409,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"ALREADY_CANCELLED\",\n  \"message\": \"Order is already cancelled\"\n}"
+            },
+            {
+              "name": "409 Cannot Cancel Collected",
+              "status": "Conflict",
+              "code": 409,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"CANNOT_CANCEL\",\n  \"message\": \"Cannot cancel an order that has already been collected\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order — sem reason",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "cancel"]
+            },
+            "description": "Cancela sem informar motivo. O campo reason é opcional."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 Audit — Logs",
+      "description": "Requerem header `X-API-Key` com role ADMIN. Retorna 403 se usar a agent key.",
+      "item": [
+        {
+          "name": "List Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{admin_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/audit?page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "audit"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "20"},
+                {"key": "resource", "value": "orders", "disabled": true},
+                {"key": "resource_id", "value": "PASTE_ORDER_ID_HERE", "disabled": true},
+                {"key": "correlation_id", "value": "PASTE_CORRELATION_ID_HERE", "disabled": true},
+                {"key": "actor", "value": "agent", "disabled": true}
+              ]
+            },
+            "description": "Lista todos os logs de auditoria. Parâmetros opcionais desativados:\n- `resource`: filtrar por tipo de recurso (ex: 'orders')\n- `resource_id`: filtrar pelo ID do recurso\n- `correlation_id`: filtrar pelo correlation_id do pedido\n- `actor`: filtrar pelo ator (ex: 'agent', 'admin')"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"d1e2f3a4-b5c6-7890-dcba-fedcba987654\",\n      \"action\": \"ORDER_CREATED\",\n      \"resource\": \"orders\",\n      \"resource_id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"correlation_id\": \"f0e1d2c3-b4a5-9687-fedc-ba9876543210\",\n      \"actor\": \"agent\",\n      \"detail\": \"exam_codes=EXM-0001,EXM-0011,EXM-0041\",\n      \"created_at\": \"2025-04-21T10:00:00Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"page_size\": 20,\n  \"pages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Audit Logs — filtro por resource_id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{admin_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/audit?resource_id={{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "audit"],
+              "query": [
+                {"key": "resource_id", "value": "{{order_id}}"}
+              ]
+            },
+            "description": "Filtra logs de auditoria pelo ID de um pedido específico. Usa a variável order_id da coleção."
+          },
+          "response": []
+        },
+        {
+          "name": "List Audit Logs — filtro por actor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{admin_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/audit?actor=agent&page=1&page_size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "audit"],
+              "query": [
+                {"key": "actor", "value": "agent"},
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "20"}
+              ]
+            },
+            "description": "Filtra logs pelo ator. Use 'agent' ou 'admin'."
+          },
+          "response": []
+        },
+        {
+          "name": "List Audit Logs — ❌ agent key (403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "X-API-Key", "value": "{{agent_key}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/audit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "audit"]
+            },
+            "description": "Demonstra que a rota de auditoria é restrita ao role admin. Com agent key retorna 403."
+          },
+          "response": [
+            {
+              "name": "403 Forbidden",
+              "status": "Forbidden",
+              "code": 403,
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"error\": \"FORBIDDEN\",\n  \"message\": \"Admin access required\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
