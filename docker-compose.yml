@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: lab_user
       POSTGRES_PASSWORD: lab_pass
       POSTGRES_DB: lab_db
+      TZ: America/Sao_Paulo
+      PGTZ: America/Sao_Paulo
     ports:
       - "5432:5432"
     volumes:
@@ -28,11 +30,26 @@ services:
       API_KEY_AGENT: agent-key-change-in-prod
       API_KEY_ADMIN: admin-key-change-in-prod
       DEBUG: "false"
+      TZ: America/Sao_Paulo
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
 
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      TZ: America/Sao_Paulo
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 volumes:
   postgres_data:
+  pgadmin_data:
