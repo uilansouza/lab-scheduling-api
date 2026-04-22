@@ -195,6 +195,9 @@ A API usa **API Key estática** via header `X-API-Key`.
 
 Documentação interativa completa disponível em `/docs` (Swagger UI) e `/redoc`.
 
+Collections  de exemplos para o Postman disponivel no projeto
+`lab_scheduling_api.postman_collection.json`
+
 ### Catálogo
 
 | Método | Rota                  | Auth   | Descrição                         |
