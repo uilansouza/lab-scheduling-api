@@ -388,3 +388,7 @@ Este projeto foi desenvolvido em **pair programming com assistente de IA (Claude
 | Estados manuais | Implementar máquina de estados explícita (ex.: `transitions`) |
 | Sem tracing distribuído | Adicionar OpenTelemetry com propagação de `correlation_id` |
 | Testes de integração | Adicionar suite com PostgreSQL real via `pytest-docker` |
+
+
+### Video de demonstração
+- [Video no Youtube](https://www.youtube.com/watch?v=gazOF2EevB8)
